@@ -1,11 +1,12 @@
-terraform {
-  cloud {
+terraform { 
+  cloud { 
+    
     organization = "Noy_organization" 
 
-    workspaces {
+    workspaces { 
       name = "apples-app" 
-    }
-  }
+    } 
+  } 
 
   required_providers {
     aws = {
