@@ -88,11 +88,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
-          # 1. שליפת ה-IP (חובה לעשות init כי זה Job חדש)
           cd ../terraform
           terraform init
           INSTANCE_IP=$(terraform output -raw instance_public_ip)
           
-          # 2. הרצה (אנסיבל ימשוך את שאר ההגדרות מה-ansible.cfg שבתיקייה)
           cd ../ansible
           ansible-playbook -i "$INSTANCE_IP," deploy-app.yaml
