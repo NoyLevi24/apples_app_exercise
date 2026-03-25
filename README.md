@@ -72,3 +72,78 @@ To terminate all resources and avoid costs:
 ```bash
 cd terraform
 terraform destroy -auto-approve
+```
+## 🏗️ Architecture & Infrastructure
+
+This project demonstrates a full GitOps pipeline using **HCP Terraform** for Infrastructure as Code (IaC) and **Ansible** for configuration management, all orchestrated via **GitHub Actions**.
+
+### System Architecture Diagram
+
+```mermaid
+graph TD
+    %% Define Styles
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef network fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef docker fill:#2496ED,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef db fill:#4DB33D,stroke:#333,stroke-width:2px,color:white;
+    classDef user fill:#fff,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5;
+
+    %% Cloud Infrastructure (Terraform)
+    subgraph AWS_Cloud [" AWS Cloud (Region: us-east-1) "]
+        direction TB
+        class AWS_Cloud aws;
+
+        subgraph VPC [" VPC (10.0.0.0/16) "]
+            direction TB
+            class VPC network;
+
+            subgraph Public_Subnet [" Public Subnet "]
+                direction TB
+                class Public_Subnet network;
+
+                subgraph SG [" Security Group: apples-sg "]
+                    direction TB
+                    class SG aws;
+                    
+                    SSH_In["Inbound: Port 22 (SSH)"]:::aws
+                    App_In["Inbound: Port 3000 (App)"]:::aws
+
+                    subgraph EC2 [" EC2 Instance (t2.micro) "]
+                        direction TB
+                        class EC2 aws;
+
+                        %% Configuration Management (Ansible & Docker)
+                        subgraph Docker_Host [" Docker Compose Runtime "]
+                            direction TB
+                            class Docker_Host docker;
+
+                            subgraph Docker_Network [" Bridge: apples-nav "]
+                                direction LR
+                                class Docker_Network docker;
+
+                                App_Cont["Node.js App\n(Port 3000)"]:::docker
+                                DB_Cont["MongoDB\n(Port 27017)"]:::db
+                                DB_Vol[("Volume: mongo-data")]:::db
+
+                                App_Cont <-->|"Internal Connect"| DB_Cont
+                                DB_Cont --- DB_Vol
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    %% External Actors & CI/CD
+    User([External User]):::user
+    GH_Actions([GitHub Actions CI/CD]):::user
+    HCP_TF([HCP Terraform State]):::user
+
+    %% Traffic Flows
+    User ==>|"HTTP Request (Port 3000)"| App_In
+    App_In ==> App_Cont
+    
+    GH_Actions -.->|"1. Fetch State"| HCP_TF
+    GH_Actions -.->|"2. Provision Infrastructure"| AWS_Cloud
+    GH_Actions ==>|"3. Configure (Ansible/SSH)"| SSH_In
