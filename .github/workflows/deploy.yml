@@ -1,6 +1,5 @@
 name: CI/CD Pipeline
 
-
 on:
 # Manual
   workflow_dispatch:
@@ -71,6 +70,12 @@ jobs:
       - name: Install Ansible
         run: pip install ansible
 
+      - name: Setup Terraform (for output)
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_wrapper: false 
+
       - name: Setup SSH Key
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > terraform/apples-key.pem
@@ -81,7 +86,13 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
-          # שליפת ה-IP מה-Terraform Output כדי שנדע לאן להתחבר
-          INSTANCE_IP=$(cd ../terraform && terraform output -raw instance_public_ip)
+          # 1. שליפת ה-IP (חובה לעשות init כי זה Job חדש)
+          cd ../terraform
+          terraform init
+          INSTANCE_IP=$(terraform output -raw instance_public_ip)
+          
+          # 2. הרצה (אנסיבל ימשוך את שאר ההגדרות מה-ansible.cfg שבתיקייה)
+          cd ../ansible
           ansible-playbook -i "$INSTANCE_IP," deploy-app.yaml
