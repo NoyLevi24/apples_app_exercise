@@ -1,0 +1,60 @@
+---
+- name: Wait for SSH to become available
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Wait for port 22 to become open
+      wait_for_connection:
+        delay: 5
+        timeout: 300
+
+- name: Configure Web Server and Deploy App
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache and install dependencies
+      apt:
+        name: [apt-transport-https, ca-certificates, curl, software-properties-common, python3-pip]
+        update_cache: yes
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '755'
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create app directory
+      file:
+        path: /home/ubuntu/apples-app
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copy application folders to server
+      copy:
+        src: "../{{ item }}"
+        dest: "/home/ubuntu/apples-app/"
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+      loop:
+        - backend
+        - mongodb
+        - docker-compose.yml
+
+    - name: Run Docker Compose
+      shell:
+        cmd: docker-compose up --build -d
+        chdir: /home/ubuntu/apples-app/

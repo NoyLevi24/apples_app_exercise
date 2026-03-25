@@ -1,0 +1,24 @@
+# --- Terraform ---
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfvars
+*.tfvars.json
+
+# --- Ansible ---
+*.retry
+ansible.log
+
+# --- SSH Keys & Secrets ---
+*.pem
+*.key
+.env
+
+# --- Node.js ---
+node_modules/
+npm-debug.log*
+
+# --- OS & IDE ---
+.DS_Store
+.vscode/
+.idea/

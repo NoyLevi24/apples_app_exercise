@@ -1,0 +1,10 @@
+{
+  "name": "apples-app",
+  "version": "1.0.0",
+  "description": "Simple hello world with apples",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.0.0"
+  }
+}

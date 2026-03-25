@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongodb/init-db.js:/docker-entrypoint-initdb.d/init-db.js:ro
+    networks:
+      - apples-nav
+  app:
+    build: ./backend
+    container_name: nodejs_app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    networks:
+      - apples-nav
+
+networks:
+  apples-nav:
+    driver: bridge
