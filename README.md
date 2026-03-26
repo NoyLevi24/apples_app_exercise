@@ -16,7 +16,8 @@ The architecture is designed for modularity and high-tech best practices:
 ### 🌐 Network Topology
 * **VPC:** `10.0.0.0/16`
 * **Public Subnet:** Direct access via Internet Gateway.
-* **Security Group:** * Port `3000`: Web Traffic.
+* **Security Group:**
+    * Port `3000`: Web Traffic.
     * Port `22`: SSH for Ansible management.
 
 ---
