@@ -43,9 +43,10 @@ This project uses a **GitOps-ready** approach where the deployment is triggered 
    * Go to the **Actions** tab in your GitHub repository.
    * Select the **"CI/CD Pipeline"** workflow.
    * Click **Run workflow**.
-3. **Wait for Completion:** * **Stage 1:** Infrastructure Provisioning (Terraform Apply).
+3. **Wait for Completion:**
+   * **Stage 1:** Infrastructure Provisioning (Terraform Apply).
    * **Stage 2:** Configuration & App Deployment (Ansible).
-4. **Access the App:** * Check the logs of the Terraform stage or the AWS Console for the Public IP.
+5. **Access the App:** * Check the logs of the Terraform stage or the AWS Console for the Public IP.
    * Open: `http://<instance-public-ip>:3000`
 
 ---
@@ -109,7 +110,7 @@ graph TD
                     SSH_In["Inbound: Port 22 (SSH)"]:::aws
                     App_In["Inbound: Port 3000 (App)"]:::aws
 
-                    subgraph EC2 [" EC2 Instance (t2.micro) "]
+                    subgraph EC2 [" EC2 Instance (t3.micro) "]
                         direction TB
                         class EC2 aws;
 
